@@ -8,7 +8,7 @@ sdt int unique
 
 create table nha_cung_cap(
 ma_cung_cap int primary key,
-ten_nha_cung_cap varchar (100),
+ten_nha_cung_cap varchar (100) not null ,
 dia_chi varchar (100),
 sdt int,
 foreign key(sdt) references sdt(id));
@@ -40,8 +40,8 @@ ten_vat_tu varchar (100)
 create table phieu_xuat_vat_tu(
 ma_vat_tu int,
 so_phieu_xuat int,
-so_luong int ,
-don_gia float,
+so_luong int check (so_luong>0) ,
+don_gia float check (don_gia>0),
 primary key(ma_vat_tu,so_phieu_xuat),
 foreign key (ma_vat_tu)references vat_tu(ma_vat_tu),
 foreign key (so_phieu_xuat)references phieu_xuat(so_phieu_xuat)
@@ -50,8 +50,8 @@ foreign key (so_phieu_xuat)references phieu_xuat(so_phieu_xuat)
 create table phieu_nhap_vat_tu(
 ma_vat_tu int,
 so_phieu_nhap int,
-so_luong int ,
-don_gia float,
+so_luong int check (so_luong>0),
+don_gia float  check (don_gia>0),
 primary key(ma_vat_tu,so_phieu_nhap),
 foreign key (ma_vat_tu)references vat_tu(ma_vat_tu),
 foreign key (so_phieu_nhap)references phieu_nhap(so_phieu_nhap)

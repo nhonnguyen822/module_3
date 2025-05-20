@@ -1,3 +1,4 @@
+
 create database if not exists quan_ly_internet;
 use quan_ly_internet;
 
@@ -35,3 +36,10 @@ foreign key (ma_khach_hang) references  khach_hang(id),
 foreign key (ma_computer) references computer(id),
 foreign key (dich_vu_di_kem_id) references dich_vu_di_kem (id));
 
+select * from computer;
+select * from computer_khach_hang;
+select * from dich_vu_di_kem;
+select * from khach_hang;
+select * from loai_khach_hang;
+
+insert into computer(id,hang_sx,vi_tri_may) values (1,"tay son", "5")
