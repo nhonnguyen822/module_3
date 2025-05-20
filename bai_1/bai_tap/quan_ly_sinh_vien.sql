@@ -15,5 +15,6 @@ select * from teachers;
 insert into class (id,name) values (1,"c02");
 insert into class (id,name) values (2,"c03");
 select * from class;
+delete from teachers;
 
 
