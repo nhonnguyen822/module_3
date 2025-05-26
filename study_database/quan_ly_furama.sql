@@ -390,6 +390,7 @@ nv.dia_chi
  having count(hd.ma_nhan_vien) <=3;
  
  -- 16.Xóa những Nhân viên chưa từng lập được hợp đồng nào từ năm 2019 đến năm 2021.
+ 
 alter table nhan_vien add is_delete tinyint default 0;
 create view get_all_nv_chua_xoa as
 select * from nhan_vien where is_delete =0;
@@ -457,14 +458,153 @@ where ma_dich_vu_di_kem in (select ma_dich_vu_di_kem from dv_di_kem_tren_10);
 
 select ma_khach_hang as id,ho_ten, email, so_dien_thoai, ngay_sinh, dia_chi from khach_hang 
 union all
-select ma_nhan_vien as id,ho_ten, email, so_dien_thoai, ngay_sinh, dia_chi from nhan_vien
-    
-    
-    
+select ma_nhan_vien as id,ho_ten, email, so_dien_thoai, ngay_sinh, dia_chi from nhan_vien;
+
+-- 21Tạo khung nhìn có tên là v_nhan_vien để lấy được thông tin của tất cả các nhân viên có địa chỉ là 
+-- “Hải Châu” và đã từng lập hợp đồng cho một hoặc nhiều khách hàng bất kì với ngày lập hợp đồng là “12/12/2019”.
+
+create view v_nhan_vien as 
+select nv.* from nhan_vien nv join hop_dong hd on hd.ma_nhan_vien=nv.ma_nhan_vien
+ where  substring_index(nv.dia_chi,',',-2) regexp'Yên Bái' and  date(hd.ngay_lam_hop_dong)='2021-04-25'
+group by nv.ma_nhan_vien;
 
 
-    
+-- 22 Thông qua khung nhìn v_nhan_vien thực hiện cập nhật địa chỉ thành “Liên Chiểu” 
+-- đối với tất cả các nhân viên được nhìn thấy bởi khung nhìn này.
+SET SQL_SAFE_UPDATES =0;
+update nhan_vien set dia_chi='Liên Chiểu' where dia_chi in(select dia_chi from v_nhan_vien);
+SET SQL_SAFE_UPDATES =1;
 
-     
+-- 23Tạo Stored Procedure sp_xoa_khach_hang dùng để xóa thông tin của một khách hàng nào đó với
+--  ma_khach_hang được truyền vào như là 1 tham số của sp_xoa_khach_hang.
+
+delimiter \\
+create procedure sp_xoa_khach_hang(in id int)
+begin 
+update khach_hang set is_delete= 1 where ma_khach_hang=id;
+end \\
+delimiter ;
+
+-- 24Tạo Stored Procedure sp_them_moi_hop_dong dùng để thêm mới vào bảng hop_dong 
+-- với yêu cầu sp_them_moi_hop_dong phải thực hiện kiểm tra tính hợp lệ của dữ liệu bổ sung, 
+-- với nguyên tắc không được trùng khóa chính và đảm bảo toàn vẹn tham chiếu đến các bảng liên quan.
+
+delimiter //
+create procedure sp_them_moi_hop_dong(in ngay_kt datetime,in tien_dc float,
+in ma_nv int,in ma_kh int, in ma_dv int)
+begin
+if tien_dc<0 then signal sqlstate'45000' set message_text ='tien dat coc khong the be hon 0';end if;
+if ngay_kt<=now() then signal sqlstate '45000'
+set message_text ='ngay ket thuc khong the nho hon ngay tao';end if;
+if not exists (select *from khach_hang where ma_khach_hang=ma_kh) then signal sqlstate '45000'
+set message_text ='ma khach hang khong ton tai';end if;
+if not exists (select *from khach_hang where ma_khach_hang=ma_kh) then signal sqlstate '45000'
+set message_text ='ma khach hang khong ton tai';end if;
+if not exists (select *from nhan_vien where ma_nhan_vien=ma_nv) then signal sqlstate '45000'
+set message_text ='ma nhan vien khong ton tai';end if;
+if not exists (select *from dich_vu where ma_dich_vu=ma_dv) then signal sqlstate '45000'
+set message_text ='ma dich vu khong ton tai';end if;
+insert into hop_dong (ngay_lam_hop_dong,ngay_ket_thuc,tien_dat_coc,ma_nhan_vien,ma_khach_hang,ma_dich_vu) values(
+ now(),ngay_kt,tien_dc,ma_nv,ma_kh,ma_dv);
+end //
+delimiter ;
+
+--  25.Tạo Trigger có tên tr_xoa_hop_dong khi xóa bản ghi trong bảng hop_dong thì hiển thị tổng
+--  số lượng bản ghi còn lại có trong bảng hop_dong ra giao diện console của database.
+
+alter table hop_dong add is_delete tinyint default 0;
+ CREATE TABLE log_hd_chua_xoa (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    massage varchar(100),
+    log_time DATE
+);
+select massage ,log_time as so_luong_hd_con_lai from log_hd_chua_xoa
+
+delimiter //
+create function so_luong_hd_con_lai()
+returns int
+reads sql data
+begin
+declare so_luong_con_lai int;
+select count(*) into so_luong_con_lai from hop_dong where is_delete=0;
+return so_luong_con_lai;
+end //
+delimiter ;
+
+ delimiter //
+ create trigger tr_xoa_hop_dong
+ after update on hop_dong
+ for each row
+ begin
+ insert  into log_hd_chua_xoa (massage,log_time) values(so_luong_hd_con_lai(),now());
+ end //
+ delimiter ;
+
+ update hop_dong set is_delete=1 where ma_hop_dong=1;
+ 
+-- 26 Tạo Trigger có tên tr_cap_nhat_hop_dong khi cập nhật ngày kết thúc hợp đồng, 
+--  cần kiểm tra xem thời gian cập nhật có phù hợp hay không, với quy tắc sau:
+--  Ngày kết thúc hợp đồng phải lớn hơn ngày làm hợp đồng ít nhất là 2 ngày.
+--  Nếu dữ liệu hợp lệ thì cho phép cập nhật, nếu dữ liệu không hợp lệ thì in ra
+--  thông báo “Ngày kết thúc hợp đồng phải lớn hơn ngày làm hợp đồng ít nhất là 2 ngày” trên console của database.
+
+create table log_cap_nhap_hop_dong(
+ id INT PRIMARY KEY AUTO_INCREMENT,
+ old_ngay_ket_thuc datetime,
+ new_ngay_ket_thuc datetime,
+ lod_time datetime);
+ select*from log_cap_nhap_hop_dong;
+
+delimiter //
+create trigger  tr_cap_nhat_hop_dong 
+before update on hop_dong
+for each row
+begin
+if datediff(new.ngay_ket_thuc,old.ngay_lam_hop_dong) <2 then signal sqlstate '45000' set message_text ='ngay ket thuc hop dong phai lon hon ngay bat dau 2 ngay';end if;
+insert  into log_cap_nhap_hop_dong ( old_ngay_ket_thuc,new_ngay_ket_thuc,lod_time) values(old.ngay_ket_thuc,new.ngay_ket_thuc,now());
+end //
+delimiter ;
+
+update hop_dong set ngay_ket_thuc ='2020-12-12' where ma_hop_dong=1;
+
+-- Tạo Function thực hiện yêu cầu sau:
+-- Tạo Function func_dem_dich_vu: Đếm các dịch vụ đã được sử dụng với tổng tiền là > 2.000.000 VNĐ.
+-- Tạo Function func_tinh_thoi_gian_hop_dong: Tính khoảng thời gian dài nhất tính từ lúc bắt đầu làm hợp
+--  đồng đến lúc kết thúc hợp đồng mà khách hàng đã thực hiện thuê dịch vụ (lưu ý chỉ xét các khoảng thời 
+--  gian dựa vào từng lần làm hợp đồng thuê dịch vụ, không xét trên toàn bộ các lần làm hợp đồng).
+--  Mã của khách hàng được truyền vào như là 1 tham số của function này.
+
+delimiter //
+create function  func_dem_dich_vu ()
+returns int 
+reads sql data
+begin
+declare so_luong_dv int;
+select count(*) into so_luong_dv from dich_vu where ma_dich_vu in (
+       select dv.ma_dich_vu from  dich_vu dv join hop_dong hd on hd.ma_dich_vu=dv.ma_dich_vu
+       group by dv.ma_dich_vu
+	   having sum(dv.chi_phi_thue)>=2000000
+);
+return so_luong_dv;
+end //
+delimiter ;
+
+delimiter //
+create function  func_tinh_thoi_gian_hop_dong (ma_kh int)
+returns int 
+reads sql data
+begin
+declare max_thoi_gian int;
+select max(datediff(ngay_ket_thuc,ngay_lam_hop_dong)) into max_thoi_gian from hop_dong where ma_khach_hang=ma_kh;
+return max_thoi_gian;
+end //
+delimiter ;
+
+
+
+
+
+
+ 
  
  
