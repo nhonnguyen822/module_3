@@ -1,0 +1,44 @@
+*{
+scroll-behavior: smooth;
+}
+p{
+    font-size: 30px;
+    text-align: justify;
+}
+
+h5 a{
+    font-size: 20px;
+    text-decoration: none;
+    list-style-type: none;
+    color: blue;
+
+}
+h2{
+    color: red;
+}
+ul{
+    list-style: none;
+}
+#header{
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    color: green;
+}
+#phu_luc{
+    color: blue;
+    width: 100%;
+    height: 325px;
+
+
+}
+#truyen{
+    color: white;
+}
+#container{
+    background-image: url("https://api.toploigiai.vn/storage/uploads/dong-vai-cam-ke-lai-cau-chuyen-tam-cam-ngan-gon_1");
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 20px;
+
+}
