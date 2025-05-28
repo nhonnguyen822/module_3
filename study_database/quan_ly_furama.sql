@@ -291,9 +291,9 @@ order by month(hd.ngay_lam_hop_dong);
 --  Kết quả hiển thị bao gồm ma_hop_dong, ngay_lam_hop_dong, ngay_ket_thuc, tien_dat_coc,
 --  so_luong_dich_vu_di_kem (được tính dựa trên việc sum so_luong ở dich_vu_di_kem).
 
-select hd.ma_hop_dong,hd.ngay_lam_hop_dong,hd.ngay_ket_thuc, hd.tien_dat_coc,sum(hdct.so_luong) from hop_dong hd 
+select hd.ma_hop_dong,hd.ngay_lam_hop_dong,hd.ngay_ket_thuc, hd.tien_dat_coc,sum(hdct.so_luong),group_concat(dvdk.ten_dich_vu_di_kem) from hop_dong hd 
 left join hop_dong_chi_tiet  hdct on  hd.ma_hop_dong=hdct.ma_hop_dong
- left join dich_vu_di_kem dvdk on  hdct.ma_dich_vu_di_kem=dvdk.ma_dich_vu_di_kem
+left join dich_vu_di_kem dvdk on  hdct.ma_dich_vu_di_kem=dvdk.ma_dich_vu_di_kem
 group by hd.ma_hop_dong;
     
    -- 11. Hiển thị thông tin các dịch vụ đi kèm đã được sử dụng bởi những khách hàng 
@@ -380,7 +380,8 @@ nv.ho_ten,
 td.ten_trinh_do,
 bp.ten_bo_phan,
 nv.so_dien_thoai,
-nv.dia_chi 
+nv.dia_chi,
+count(hd.ma_hop_dong)
  from nhan_vien nv 
  join bo_phan bp on nv.ma_bo_phan=bp.ma_bo_phan
  join trinh_do td on nv.ma_trinh_do =td.ma_trinh_do
@@ -392,8 +393,7 @@ nv.dia_chi
  -- 16.Xóa những Nhân viên chưa từng lập được hợp đồng nào từ năm 2019 đến năm 2021.
  
 alter table nhan_vien add is_delete tinyint default 0;
-create view get_all_nv_chua_xoa as
-select * from nhan_vien where is_delete =0;
+
 
 create view nv_chua_tao_hd as select nv.ma_nhan_vien from nhan_vien nv left join hop_dong hd on nv.ma_nhan_vien=hd.ma_nhan_vien
 where nv.ma_nhan_vien not in (
@@ -405,8 +405,8 @@ where nv.ma_nhan_vien not in (
         )
         group by nv.ma_nhan_vien;
         
-        create temporary table bang_tam as select ma_nhan_vien from  nv_chua_tao_hd;
-        
+create temporary table bang_tam as select ma_nhan_vien from  nv_chua_tao_hd;
+	
 update nhan_vien set is_delete=1 where ma_nhan_vien in (select ma_nhan_vien from bang_tam);
  select * from  get_all_nv_chua_xoa;
  
