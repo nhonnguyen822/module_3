@@ -1,5 +1,6 @@
 package com.example.bai_tap_1.service;
 
+import com.example.bai_tap_1.dto.ProductDtoResponse;
 import com.example.bai_tap_1.entity.Products;
 import com.example.bai_tap_1.repository.IProductRepository;
 import com.example.bai_tap_1.repository.ProductRepository;
@@ -9,24 +10,25 @@ import java.util.List;
 public class ProductService implements IProductService {
     private static final IProductRepository productRepository = new ProductRepository();
 
+
     @Override
-    public List<Products> findAll() {
+    public List<ProductDtoResponse> findAll() {
         return productRepository.findAll();
     }
 
     @Override
-    public void save(Products product) {
-        productRepository.save(product);
+    public boolean save(Products product) {
+        return productRepository.save(product);
     }
 
     @Override
-    public void update(Products product) {
-        productRepository.update(product);
+    public boolean update(Products products) {
+        return productRepository.update(products);
     }
 
     @Override
-    public void remove(int id) {
-        productRepository.remove(id);
+    public boolean remove(int id) {
+        return productRepository.remove(id);
     }
 
     @Override

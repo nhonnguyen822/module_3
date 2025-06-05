@@ -1,7 +1,11 @@
 package com.example.bai_tap_1.controller;
 
+import com.example.bai_tap_1.dto.ProductDtoResponse;
+import com.example.bai_tap_1.entity.Manufacturer;
 import com.example.bai_tap_1.entity.Products;
+import com.example.bai_tap_1.service.IManufactureService;
 import com.example.bai_tap_1.service.IProductService;
+import com.example.bai_tap_1.service.ManufactureService;
 import com.example.bai_tap_1.service.ProductService;
 
 import javax.servlet.ServletException;
@@ -15,6 +19,7 @@ import java.util.List;
 @WebServlet(name = "productController", urlPatterns = "/products")
 public class ProductController extends HttpServlet {
     private static final IProductService productService = new ProductService();
+    private static final IManufactureService manufactureService = new ManufactureService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -38,12 +43,14 @@ public class ProductController extends HttpServlet {
     }
 
     private void showList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Products> productsList = productService.findAll();
+        List<ProductDtoResponse> productsList = productService.findAll();
         req.setAttribute("productsList", productsList);
         req.getRequestDispatcher("/view/list.jsp").forward(req, resp);
     }
 
     private void showFormCreate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<Manufacturer> manufacturerList = manufactureService.findAll();
+        req.setAttribute("manufacturerList", manufacturerList);
         req.getRequestDispatcher("/view/create.jsp").forward(req, resp);
     }
 
@@ -83,40 +90,50 @@ public class ProductController extends HttpServlet {
 
     private void updateProduct(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         int id = Integer.parseInt(req.getParameter("productId"));
-        String productName = req.getParameter("productName");
-        int productPrice = Integer.parseInt(req.getParameter("productPrice"));
+        String name = req.getParameter("productName");
+        int price = Integer.parseInt(req.getParameter("productPrice"));
         String productDescription = req.getParameter("productDescription");
-        String manufacturer = req.getParameter("manufacturer");
-        Products product = new Products(id, productName, productPrice, productDescription, manufacturer);
-        productService.update(product);
-        resp.sendRedirect("products?message=update thanh cong");
+        int manufacturer_id = Integer.parseInt(req.getParameter("manufacturer_id"));
+        Products products = new Products(id, name, price, productDescription, manufacturer_id);
+        boolean updateSuccess = productService.update(products);
+        String mess = "update success";
+        if (! updateSuccess) {
+            mess = "not update success";
+        }
+        resp.sendRedirect("/products?message" + mess);
     }
 
     private void findIdCanUpdate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int id = Integer.parseInt(req.getParameter("updateProductId"));
-        Products product = productService.findById(id);
-        if (product != null) {
-            req.setAttribute("product", product);
-            req.getRequestDispatcher("/view/update.jsp").forward(req, resp);
-        }
+        int updateProductId = Integer.parseInt(req.getParameter("updateProductId"));
+        ProductDtoResponse productDtoResponse = productService.findProductById(updateProductId);
+        List<Manufacturer> manufacturerList = manufactureService.findAll();
+        req.setAttribute("manufacturerList", manufacturerList);
+        req.setAttribute("productDtoResponse", productDtoResponse);
+        req.getRequestDispatcher("/view/update.jsp").forward(req, resp);
     }
 
     private void deleteProductId(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         int id = Integer.parseInt(req.getParameter("deleteProductId"));
-        productService.remove(id);
-        resp.sendRedirect("products?message=da xoa thanh cong");
+        boolean isDeleteSuccess = productService.remove(id);
+        String mess = "delete success";
+        if (!isDeleteSuccess) {
+            mess = "not delete success";
+        }
+        resp.sendRedirect("/products?message" + mess);
     }
 
     private void save(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        int id = productService.findMaxId() + 1;
-        String productName = req.getParameter("productName");
-        int productPrice = Integer.parseInt(req.getParameter("productPrice"));
+        String name = req.getParameter("productName");
+        int price = Integer.parseInt(req.getParameter("productPrice"));
         String productDescription = req.getParameter("productDescription");
-        String manufacturer = req.getParameter("manufacturer");
-        Products product = new Products(id, productName, productPrice, productDescription, manufacturer);
-        productService.save(product);
-        resp.sendRedirect("products?message=them moi thanh cong");
+        int manufacturer_id = Integer.parseInt(req.getParameter("manufacturerId"));
+        Products products = new Products(name, price, productDescription, manufacturer_id);
+        boolean isSaveSuccess = productService.save(products);
+        String mess = "create success";
+        if (!isSaveSuccess) {
+            mess = "not create success";
+        }
+        resp.sendRedirect("/products?message" + mess);
     }
-
 }
 

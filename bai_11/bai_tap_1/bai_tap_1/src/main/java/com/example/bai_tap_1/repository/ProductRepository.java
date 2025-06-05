@@ -1,64 +1,94 @@
 package com.example.bai_tap_1.repository;
 
+import com.example.bai_tap_1.dto.ProductDtoResponse;
 import com.example.bai_tap_1.entity.Products;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductRepository implements IProductRepository {
-    private static final List<Products> productsList = new ArrayList<>();
+    private static final String SELECT_ALL = "select p.id,p.name,p.price,p.productDescription ,m.name as hangSX " +
+            "from products p \n" +
+            "left join manufacturer m on p.manufacturer_id=m.id";
+    private static final String INSERT_INTO = "insert into products(name,price,productDescription)value(?,?,?);";
+    private final String DELETE_BY_ID = "delete from products where id=?;";
+    private final String UPDATE_BY_ID = "update products set name=?,price=?," +
+            "                                                productDescription=?,manufacturer_id=? where id=?;";
 
-    static {
-        productsList.add(new Products(1, "Laptop Dell XPS 13", 25000000, "Ultrabook cao cấp, màn hình 13 inch", "Dell"));
-        productsList.add(new Products(2, "iPhone 15 Pro", 34000000, "Điện thoại thông minh, camera 48MP", "Apple"));
-        productsList.add(new Products(3, "Máy giặt LG Inverter", 8900000, "Công nghệ giặt hơi nước, tiết kiệm điện", "LG"));
-        productsList.add(new Products(4, "Smart TV Samsung 55", 15000000, "TV 4K, hỗ trợ Smart Hub", "Samsung"));
-        productsList.add(new Products(5, "Máy lọc không khí Xiaomi", 3200000, "Lọc bụi mịn PM2.5, kết nối app", "Xiaomi"));
-        productsList.add(new Products(6, "Bàn phím cơ Logitech G Pro", 2900000, "Bàn phím chơi game, đèn RGB", "Logitech"));
-    }
 
     @Override
-    public List<Products> findAll() {
+    public List<ProductDtoResponse> findAll() {
+        List<ProductDtoResponse> productsList = new ArrayList<>();
+        try (Connection connection = BaseRepository.getConnectDB();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                int price = resultSet.getInt("price");
+                String productDescription = resultSet.getString("productDescription");
+                String manufacturer_name = resultSet.getString("hangSX");
+                ProductDtoResponse product = new ProductDtoResponse(id, name, price, productDescription, manufacturer_name);
+                productsList.add(product);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return productsList;
     }
 
     @Override
-    public void save(Products product) {
-        productsList.add(product);
+    public boolean save(Products product) {
+        try (Connection connection = BaseRepository.getConnectDB();
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO)) {
+            preparedStatement.setString(1, product.getName());
+            preparedStatement.setInt(2, product.getPrice());
+            preparedStatement.setString(3, product.getProductDescription());
+            int effectRow = preparedStatement.executeUpdate();
+            return effectRow == 1;
+        } catch (SQLException e) {
+            System.out.println("loi ket noi db");
+        }
+        return false;
     }
 
     @Override
-    public void update(Products product) {
-        List<Products> productsList = findAll();
-        for (Products products : productsList) {
-            if (product.getId() == products.getId()) {
-                products.setName(product.getName());
-                products.setPrice(product.getPrice());
-                products.setProductDescription(product.getProductDescription());
-                products.setManufacturer(product.getManufacturer());
-            }
+    public boolean update(Products product) {
+        try (Connection connection = BaseRepository.getConnectDB();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_BY_ID)) {
+            preparedStatement.setString(1, product.getName());
+            preparedStatement.setInt(2, product.getPrice());
+            preparedStatement.setString(3, product.getProductDescription());
+            preparedStatement.setInt(4, product.getManufacturer_id());
+            preparedStatement.setInt(5, product.getId());
+            int effectRow = preparedStatement.executeUpdate();
+            return effectRow == 1;
+        } catch (SQLException e) {
+            System.out.println("loi ket noi db");
         }
+        return false;
     }
 
     @Override
-    public void remove(int id) {
-        List<Products> productsList = findAll();
-        for (int i = 0; i < productsList.size(); i++) {
-            if (productsList.get(i).getId() == id) {
-                productsList.remove(productsList.get(i));
-            }
+    public boolean remove(int id) {
+        try (Connection connection = BaseRepository.getConnectDB();
+             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BY_ID)) {
+            preparedStatement.setInt(1, id);
+            int effectRow = preparedStatement.executeUpdate();
+            return effectRow == 1;
+        } catch (SQLException e) {
+            System.out.println("loi ket noi db");
         }
+        return false;
     }
 
     @Override
     public List<Products> findByName(String name) {
-        List<Products> productsListFindByName = new ArrayList<>();
-        List<Products> productsList = findAll();
-        for (int i = 0; i < productsList.size(); i++) {
-            if (productsList.get(i).getName().toLowerCase().contains(name)) {
-                productsListFindByName.add(productsList.get(i));
-            }
-        }
-        return productsListFindByName;
+        return null;
     }
 }

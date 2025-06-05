@@ -1,17 +1,18 @@
 package com.example.bai_tap_1.repository;
 
+import com.example.bai_tap_1.dto.ProductDtoResponse;
 import com.example.bai_tap_1.entity.Products;
 
 import java.util.List;
 
 public interface IProductRepository {
-    List<Products> findAll();
+    List<ProductDtoResponse> findAll();
 
-    void save(Products product);
+    boolean save(Products product);
 
-    void update(Products product);
+    boolean update(Products products);
 
-    void remove(int id);
+    boolean remove(int id);
 
     List<Products> findByName(String name);
 }

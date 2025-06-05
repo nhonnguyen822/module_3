@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
     <title>Title</title>
@@ -16,24 +17,32 @@
 <body>
 
 <form method="post" action="products?action=update">
-    <input type="hidden" name="productId" value="${product.id}">
+    <input type="hidden" name="productId" value="${productDtoResponse.id}">
     <div class="mb-3">
         <label class="form-label">ProductName</label>
-        <input type="text" class="form-control" name="productName" value="${product.name}">
+        <input type="text" class="form-control" name="productName" value="${productDtoResponse.name}">
         <div class="form-text">....</div>
     </div>
     <div class="mb-3">
         <label class="form-label">Price</label>
-        <input type="number" class="form-control" name="productPrice" value="${product.price}">
+        <input type="number" class="form-control" name="productPrice" value="${productDtoResponse.price}">
         <div class="form-text">....</div>
     </div>
     <div class="mb-3">
         <label class="form-label">ProductDescription</label>
-        <input type="text" class="form-control" name="productDescription" value="${product.productDescription}">
+        <input type="text" class="form-control" name="productDescription"
+               value="${productDtoResponse.productDescription}">
     </div>
     <div class="mb-3 form-label">
-        <label class="form-label">manufacturer</label>
-        <input type="text" class="form-control" name="manufacturer" value="${product.manufacturer}">
+        <label class="form-label">ManufacturerName</label>
+        <select name="manufacturer_id">
+            <c:forEach items="${manufacturerList}" var="manufacturer">
+                <option value="${manufacturer.id}">${manufacturer.name}</option>
+            </c:forEach>
+            <option>
+            </option>
+        </select>
+        <input type="text" class="form-control" name="manufacturer" value="${productDtoResponse.hangSX}">
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>

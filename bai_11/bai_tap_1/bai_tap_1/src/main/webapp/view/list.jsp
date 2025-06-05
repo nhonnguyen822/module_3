@@ -10,9 +10,16 @@
 <html>
 <head>
     <title>Title</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
 <div class="container container-section" id="contract-section">
@@ -25,63 +32,39 @@
         <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
 
-    <table class="table table-sm table-bordered text-center table-striped">
+    <table class="table table-sm table-bordered text-center table-striped" id="tableProduct">
         <thead class="table-light">
         <tr>
             <th>NO</th>
             <th>Product Name</th>
             <th>Price</th>
             <th>ProductDescription</th>
-            <th>Manufacturer</th>
+            <th>ManufacturerName</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
-        <c:if test="${empty searchName}">
-            <c:forEach var="product" items="${productsList}" varStatus="idx">
-                <tr>
-                    <td>${idx.count}</td>
-                    <th>${product.name}</th>
-                    <td>${product.price}</td>
-                    <td>${product.productDescription}</td>
-                    <td>${product.manufacturer}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
-                                data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
-                            <i class="fa fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
-                                data-id="${product.id}"
-                                data-bs-target="#confirmDeleteModal"
-                                onclick="deleteInfo('${product.id}','${product.name}')">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            </c:forEach>
-        </c:if>
-        <c:if test="${searchName !=''}">
-            <c:forEach var="product" items="${productsListFindByName}" varStatus="idx">
-                <tr>
-                    <td>${idx.count}</td>
-                    <th>${product.name}</th>
-                    <td>${product.price}</td>
-                    <td>${product.productDescription}</td>
-                    <td>${product.manufacturer}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
-                                data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
-                            <i class="fa fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
-                                data-id="${product.id}"
-                                data-bs-target="#confirmDeleteModal"
-                                onclick="deleteInfo('${product.id}','${product.name}')">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            </c:forEach>
-        </c:if>
+        <c:forEach var="product" items="${productsList}" varStatus="idx">
+            <tr>
+                <td>${idx.count}</td>
+                <td>${product.name}</td>
+                <td>${product.price}</td>
+                <td>${product.productDescription}</td>
+                <td>${product.hangSX}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
+                            data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
+                            data-id="${product.id}"
+                            data-bs-target="#confirmDeleteModal"
+                            onclick="deleteInfo('${product.id}','${product.name}')">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        </c:forEach>
         </tbody>
     </table>
 
@@ -137,5 +120,13 @@
     function updateInfo(id) {
         document.getElementById("updateProductId").value = id;
     }
+
+    $(document).ready(function () {
+        $('#tableProduct').dataTable({
+            "dom": 'lrtip',
+            "lengthChange": false,
+            "pageLength": 2
+        })
+    })
 </script>
 </html>

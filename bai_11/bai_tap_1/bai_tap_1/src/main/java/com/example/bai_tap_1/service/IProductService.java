@@ -1,43 +1,30 @@
 package com.example.bai_tap_1.service;
 
+import com.example.bai_tap_1.dto.ProductDtoResponse;
 import com.example.bai_tap_1.entity.Products;
 
-import java.util.ArrayList;
+
+import java.sql.ResultSet;
 import java.util.List;
 
 public interface IProductService {
-    List<Products> findAll();
+    List<ProductDtoResponse> findAll();
 
-    void save(Products product);
+    boolean save(Products product);
 
-    void update(Products product);
+    boolean update(Products products);
 
-    void remove(int id);
+    boolean remove(int id);
 
     List<Products> findByName(String name);
 
-    default int findMaxId() {
-        List<Products> productsList = findAll();
-        if (productsList.isEmpty()) {
-            return 0;
-        }
-        int max = 0;
-        for (Products products : productsList) {
-            if (max < products.getId()) {
-                max = products.getId();
-            }
-        }
-        return max;
-    }
-
-    default Products findById(int id) {
-        List<Products> productsList = findAll();
-        for (Products product : productsList) {
-            if (product.getId() == id) {
-                return product;
+    default ProductDtoResponse findProductById(int id) {
+        List<ProductDtoResponse> productDtoResponses = findAll();
+        for (ProductDtoResponse productDtoResponse : productDtoResponses) {
+            if (productDtoResponse.getId() == id) {
+                return productDtoResponse;
             }
         }
         return null;
     }
-
 }

@@ -1,27 +1,28 @@
-package com.example.bai_tap_1.entity;
+package com.example.bai_tap_1.dto;
 
-public class Products {
+public class ProductDtoResponse {
     private int id;
     private String name;
     private int price;
     private String productDescription;
-    private int manufacturer_id;
+    private String hangSX;
 
-    public Products() {
-    }
-    public Products( String name, int price, String productDescription, int manufacturer_id) {
-        this.name = name;
-        this.price = price;
-        this.productDescription = productDescription;
-        this.manufacturer_id = manufacturer_id;
-    }
-
-    public Products(int id, String name, int price, String productDescription, int manufacturer_id) {
+    public ProductDtoResponse(int id, String name, int price, String productDescription, String hangSX) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.productDescription = productDescription;
-        this.manufacturer_id = manufacturer_id;
+        this.hangSX = hangSX;
+    }
+
+    public ProductDtoResponse(String name, int price, String productDescription, String hangSX) {
+        this.name = name;
+        this.price = price;
+        this.productDescription = productDescription;
+        this.hangSX = hangSX;
+    }
+
+    public ProductDtoResponse() {
     }
 
     public int getId() {
@@ -56,11 +57,11 @@ public class Products {
         this.productDescription = productDescription;
     }
 
-    public int getManufacturer_id() {
-        return manufacturer_id;
+    public String getHangSX() {
+        return hangSX;
     }
 
-    public void setManufacturer_id(int manufacturer_id) {
-        this.manufacturer_id = manufacturer_id;
+    public void setHangSX(String hangSX) {
+        this.hangSX = hangSX;
     }
 }
