@@ -77,9 +77,9 @@ public class ProductController extends HttpServlet {
                 break;
             case "search":
                 String searchName = req.getParameter("search");
-                List<Products> productsListFindByName = productService.findByName(searchName);
-                req.setAttribute("searchName", searchName);
-                req.setAttribute("productsListFindByName", productsListFindByName);
+                int minPrice = Integer.parseInt(req.getParameter("minPrice"));
+                List<ProductDtoResponse> productDtoResponse = productService.findByNameAndPrice(minPrice, searchName);
+                req.setAttribute("productDtoResponse", productDtoResponse);
                 req.getRequestDispatcher("/view/list.jsp").forward(req, resp);
                 break;
             default:
@@ -97,7 +97,7 @@ public class ProductController extends HttpServlet {
         Products products = new Products(id, name, price, productDescription, manufacturer_id);
         boolean updateSuccess = productService.update(products);
         String mess = "update success";
-        if (! updateSuccess) {
+        if (!updateSuccess) {
             mess = "not update success";
         }
         resp.sendRedirect("/products?message" + mess);

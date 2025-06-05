@@ -20,6 +20,11 @@ public class ProductRepository implements IProductRepository {
             "                                                productDescription=?,manufacturer_id=? where id=?;";
 
 
+    private final String SEARCH_BY_NAME_AND_PRICE = "select p.id,p.name,p.price,p.productDescription,m.name as hang_sx " +
+            "from products p join manufacturer m on p.manufacturer_id=m.id\n" +
+            "where price>? and p.name like ?";
+
+
     @Override
     public List<ProductDtoResponse> findAll() {
         List<ProductDtoResponse> productsList = new ArrayList<>();
@@ -88,7 +93,27 @@ public class ProductRepository implements IProductRepository {
     }
 
     @Override
-    public List<Products> findByName(String name) {
-        return null;
+    public List<ProductDtoResponse> findByNameAndPrice(int price, String name) {
+        List<ProductDtoResponse> productsListSearch = new ArrayList<>();
+        try (Connection connection = BaseRepository.getConnectDB();
+             PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_BY_NAME_AND_PRICE);
+        ) {
+            preparedStatement.setInt(1, price);
+            preparedStatement.setString(2, "%" +name+ "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String productName = resultSet.getString("name");
+                int productPrice = resultSet.getInt("price");
+                String productDescription = resultSet.getString("productDescription");
+                String manufacturer_name = resultSet.getString("hang_sx");
+                ProductDtoResponse product = new ProductDtoResponse(id, productName, productPrice, productDescription, manufacturer_name);
+                productsListSearch.add(product);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return productsListSearch;
     }
+
 }

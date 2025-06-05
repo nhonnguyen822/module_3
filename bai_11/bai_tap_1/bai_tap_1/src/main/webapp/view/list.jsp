@@ -28,7 +28,13 @@
         <i class="fa fa-plus"></i> Create New Product
     </button>
     <form class="d-flex" role="search" method="post" action="products?action=search">
-        <input class="form-control me-2" type="search" placeholder="Search by name" name="search" aria-label="Search">
+        <input class="form-control" type="search" placeholder="Search by name" name="search" aria-label="Search">
+        <select name="minPrice" class="form-control" aria-label="Search">
+            <option value="${0}">-- Chọn giá thấp nhất --</option>
+            <option value="${1000}"> 1000</option>
+            <option value="${2000}"> 2000</option>
+            <option value="${5000}"> 5000</option>
+        </select>
         <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
 
@@ -44,27 +50,56 @@
         </tr>
         </thead>
         <tbody>
-        <c:forEach var="product" items="${productsList}" varStatus="idx">
-            <tr>
-                <td>${idx.count}</td>
-                <td>${product.name}</td>
-                <td>${product.price}</td>
-                <td>${product.productDescription}</td>
-                <td>${product.hangSX}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
-                            data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
-                        <i class="fa fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
-                            data-id="${product.id}"
-                            data-bs-target="#confirmDeleteModal"
-                            onclick="deleteInfo('${product.id}','${product.name}')">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        </c:forEach>
+        <c:choose>
+            <c:when test="${
+            empty productDtoResponse}">
+                <c:forEach var="product" items="${productsList}" varStatus="idx">
+                    <tr>
+                        <td>${idx.count}</td>
+                        <td>${product.name}</td>
+                        <td>${product.price}</td>
+                        <td>${product.productDescription}</td>
+                        <td>${product.hangSX}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
+                                    data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
+                                    data-id="${product.id}"
+                                    data-bs-target="#confirmDeleteModal"
+                                    onclick="deleteInfo('${product.id}','${product.name}')">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="product" items="${productDtoResponse}" varStatus="idx">
+                    <tr>
+                        <td>${idx.count}</td>
+                        <td>${product.name}</td>
+                        <td>${product.price}</td>
+                        <td>${product.productDescription}</td>
+                        <td>${product.hangSX}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
+                                    data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
+                                    data-id="${product.id}"
+                                    data-bs-target="#confirmDeleteModal"
+                                    onclick="deleteInfo('${product.id}','${product.name}')">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </c:otherwise>
+        </c:choose>
+
         </tbody>
     </table>
 

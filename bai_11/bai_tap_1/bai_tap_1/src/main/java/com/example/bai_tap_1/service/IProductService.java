@@ -16,7 +16,7 @@ public interface IProductService {
 
     boolean remove(int id);
 
-    List<Products> findByName(String name);
+    List<ProductDtoResponse> findByNameAndPrice(int price, String name);
 
     default ProductDtoResponse findProductById(int id) {
         List<ProductDtoResponse> productDtoResponses = findAll();

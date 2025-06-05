@@ -14,5 +14,5 @@ public interface IProductRepository {
 
     boolean remove(int id);
 
-    List<Products> findByName(String name);
+    List<ProductDtoResponse> findByNameAndPrice(int price, String name);
 }
