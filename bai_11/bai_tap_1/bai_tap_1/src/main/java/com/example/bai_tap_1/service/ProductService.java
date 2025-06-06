@@ -10,7 +10,6 @@ import java.util.List;
 public class ProductService implements IProductService {
     private static final IProductRepository productRepository = new ProductRepository();
 
-
     @Override
     public List<ProductDtoResponse> findAll() {
         return productRepository.findAll();
@@ -32,7 +31,7 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public List<ProductDtoResponse> findByNameAndPrice(int price, String name) {
-        return productRepository.findByNameAndPrice(price, name);
+    public List<ProductDtoResponse> findByNameAndPrice(int manufacturerId, String name) {
+        return productRepository.findByNameAndPrice(manufacturerId, name);
     }
 }

@@ -17,7 +17,6 @@
     <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
@@ -27,13 +26,14 @@
     <button class="btn btn-success mb-3" onclick="window.location.href='products?action=create'">
         <i class="fa fa-plus"></i> Create New Product
     </button>
+
     <form class="d-flex" role="search" method="post" action="products?action=search">
         <input class="form-control" type="search" placeholder="Search by name" name="search" aria-label="Search">
-        <select name="minPrice" class="form-control" aria-label="Search">
+        <select name="manufacturer_id" class="form-control" aria-label="Search">
             <option value="${0}">-- Chọn giá thấp nhất --</option>
-            <option value="${1000}"> 1000</option>
-            <option value="${2000}"> 2000</option>
-            <option value="${5000}"> 5000</option>
+            <c:forEach items="${manufacturerList}" var="manufacturer">
+                <option value="${manufacturer.id}"> ${manufacturer.name}</option>
+            </c:forEach>
         </select>
         <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
@@ -50,56 +50,27 @@
         </tr>
         </thead>
         <tbody>
-        <c:choose>
-            <c:when test="${
-            empty productDtoResponse}">
-                <c:forEach var="product" items="${productsList}" varStatus="idx">
-                    <tr>
-                        <td>${idx.count}</td>
-                        <td>${product.name}</td>
-                        <td>${product.price}</td>
-                        <td>${product.productDescription}</td>
-                        <td>${product.hangSX}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
-                                    data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
-                                <i class="fa fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
-                                    data-id="${product.id}"
-                                    data-bs-target="#confirmDeleteModal"
-                                    onclick="deleteInfo('${product.id}','${product.name}')">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </c:when>
-            <c:otherwise>
-                <c:forEach var="product" items="${productDtoResponse}" varStatus="idx">
-                    <tr>
-                        <td>${idx.count}</td>
-                        <td>${product.name}</td>
-                        <td>${product.price}</td>
-                        <td>${product.productDescription}</td>
-                        <td>${product.hangSX}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
-                                    data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
-                                <i class="fa fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
-                                    data-id="${product.id}"
-                                    data-bs-target="#confirmDeleteModal"
-                                    onclick="deleteInfo('${product.id}','${product.name}')">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </c:otherwise>
-        </c:choose>
-
+        <c:forEach var="product" items="${productsList}" varStatus="idx">
+            <tr>
+                <td>${idx.count}</td>
+                <td>${product.name}</td>
+                <td>${product.price}</td>
+                <td>${product.productDescription}</td>
+                <td>${product.hangSX}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning btn-update me-1" data-bs-toggle="modal"
+                            data-bs-target="#updateContractModal" onclick="updateInfo(${product.id})">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-delete" data-bs-toggle="modal"
+                            data-id="${product.id}"
+                            data-bs-target="#confirmDeleteModal"
+                            onclick="deleteInfo('${product.id}','${product.name}')">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        </c:forEach>
         </tbody>
     </table>
 

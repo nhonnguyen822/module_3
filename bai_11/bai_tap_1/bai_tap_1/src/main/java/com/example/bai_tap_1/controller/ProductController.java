@@ -44,6 +44,8 @@ public class ProductController extends HttpServlet {
 
     private void showList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<ProductDtoResponse> productsList = productService.findAll();
+        List<Manufacturer> manufacturerList = manufactureService.findAll();
+        req.setAttribute("manufacturerList", manufacturerList);
         req.setAttribute("productsList", productsList);
         req.getRequestDispatcher("/view/list.jsp").forward(req, resp);
     }
@@ -77,9 +79,11 @@ public class ProductController extends HttpServlet {
                 break;
             case "search":
                 String searchName = req.getParameter("search");
-                int minPrice = Integer.parseInt(req.getParameter("minPrice"));
-                List<ProductDtoResponse> productDtoResponse = productService.findByNameAndPrice(minPrice, searchName);
-                req.setAttribute("productDtoResponse", productDtoResponse);
+                int manufacturer_id = Integer.parseInt(req.getParameter("manufacturer_id"));
+                List<ProductDtoResponse> productsList = productService.findByNameAndPrice(manufacturer_id, searchName);
+                List<Manufacturer> manufacturerList = manufactureService.findAll();
+                req.setAttribute("manufacturerList", manufacturerList);
+                req.setAttribute("productsList", productsList);
                 req.getRequestDispatcher("/view/list.jsp").forward(req, resp);
                 break;
             default:
